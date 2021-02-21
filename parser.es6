@@ -20,8 +20,6 @@ const DEFAULT_COMMENT_DECL = {
     before: ''
 }
 
-const SUPPORTED_AT_KEYWORDS = ['media']
-
 class SassParser {
     constructor (input) {
         this.input = input
@@ -30,6 +28,8 @@ class SassParser {
     parse () {
         try {
             this.node = gonzales.parse(this.input.css, { syntax: 'sass' })
+            // disable loops, since the linter crashes with it atm
+            this.node.content = this.node.content.filter(el => el.type !== 'loop')
         } catch (error) {
             throw this.input.error(error.message, error.line, 1)
         }
@@ -76,7 +76,6 @@ class SassParser {
     ruleset (node, parent) {
         // Loop to find the deepest ruleset node
         this.raws.multiRuleProp = ''
-
         node.content.forEach(contentNode => {
             switch (contentNode.type) {
                 case 'block': {
@@ -435,35 +434,6 @@ class SassParser {
     }
 
     atrule (node, parent) {
-        // Skip unsupported @xxx rules
-        let supportedNode = node.content[0].content.some(contentNode =>
-            SUPPORTED_AT_KEYWORDS.includes(contentNode.content)
-        )
-        if (!supportedNode) return
-
-        let atrule = postcss.rule()
-        atrule.selector = ''
-        atrule.raws = {
-            before: this.raws.before || DEFAULT_RAWS_RULE.before,
-            between: DEFAULT_RAWS_RULE.between
-        }
-        node.content.forEach((contentNode, i) => {
-            if (contentNode.type === 'space') {
-                let prevNodeType = node.content[i - 1].type
-                switch (prevNodeType) {
-                    case 'atkeyword':
-                    case 'ident':
-                        atrule.selector += contentNode.content
-                        break
-                    default:
-                }
-                return
-            }
-            this.process(contentNode, atrule)
-        })
-        // atrule.parent = parent || {}
-        // atrule.source = { input: {} }
-        // parent.nodes.push(atrule)
     }
 
     parentheses (node, parent) {
