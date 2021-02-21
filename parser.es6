@@ -461,7 +461,9 @@ class SassParser {
             }
             this.process(contentNode, atrule)
         })
-        parent.nodes.push(atrule)
+        // atrule.parent = parent || {}
+        // atrule.source = { input: {} }
+        // parent.nodes.push(atrule)
     }
 
     parentheses (node, parent) {
