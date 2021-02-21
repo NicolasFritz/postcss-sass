@@ -50,7 +50,7 @@
   },
   "scripts": {
     "clean": "rm *.js || echo 'Already cleaned'",
-    "build": "yarn run clean && babel -s inline -d ./ *.es6",
+    "build": "npm run clean && babel -s inline -d ./ *.es6",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls",
     "prepublishOnly": "yarn run build && yarn run test",
     "pretest": "eslint *.es6 __tests__",
