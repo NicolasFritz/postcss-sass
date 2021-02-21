@@ -28,8 +28,6 @@ class SassParser {
     parse () {
         try {
             this.node = gonzales.parse(this.input.css, { syntax: 'sass' })
-            // disable loops, since the linter crashes with it atm
-            this.node.content = this.node.content.filter(el => el.type !== 'loop')
         } catch (error) {
             throw this.input.error(error.message, error.line, 1)
         }
@@ -410,27 +408,6 @@ class SassParser {
     }
 
     loop (node, parent) {
-        let loop = postcss.rule()
-        this.raws.comment = false
-        this.raws.multiRule = false
-        this.raws.loop = true
-        loop.selector = ''
-        loop.raws = {
-            before: this.raws.before || DEFAULT_RAWS_RULE.before,
-            between: DEFAULT_RAWS_RULE.between
-        }
-        if (this.raws.beforeMulti) {
-            loop.raws.before += this.raws.beforeMulti
-            this.raws.beforeMulti = undefined
-        }
-        node.content.forEach((contentNode, i) => {
-            if (node.content[i + 1] && node.content[i + 1].type === 'block') {
-                this.raws.loop = false
-            }
-            this.process(contentNode, loop)
-        })
-        parent.nodes.push(loop)
-        this.raws.loop = false
     }
 
     atrule (node, parent) {
